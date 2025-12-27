@@ -62,7 +62,6 @@ num_by_cat_stats <- function(df, num, cat){
 #' @param x Vector
 #' @param y Vector for Cross-tabulations.
 #' @param prop Character indicating what type of proportions to provide. Defaults to "all".
-#' @param df Logical indicating to provide a tibble for cross tabulations with table proportions.
 #' @param tbl_df Logical indicating if you need a df for a single variable for a pie chart or other things.
 #' @param digits number of decimal places to round
 #'
@@ -71,7 +70,7 @@ num_by_cat_stats <- function(df, num, cat){
 #' @importFrom utils capture.output
 #'
 #'
-cat_stats <- function(x, y = NULL, prop = "all", df = FALSE, tbl_df = FALSE, digits = 4){
+cat_stats <- function(x, y = NULL, prop = "all", tbl_df = FALSE, digits = 4){
   if (!prop %in% c("all", "row", "col", "table")){
     stop(paste(capture.output({
       cat("The Prop argument can only be on of the following: \n")
@@ -94,7 +93,7 @@ cat_stats <- function(x, y = NULL, prop = "all", df = FALSE, tbl_df = FALSE, dig
       post <- list(table = post_table, categories = unique(px), missing = miss)
       return(post)
     } else {
-      post <- cbind(tbl, round(ptbl, 4))
+      post <- cbind(tbl, round(ptbl, digits))
       colnames(post) <- c("n", "prop")
       message(paste(capture.output({
         cat("Continguency Table \n \n")
@@ -107,7 +106,7 @@ cat_stats <- function(x, y = NULL, prop = "all", df = FALSE, tbl_df = FALSE, dig
     }
   } else {
     xtab <- table({{x}}, {{y}})
-    tbl_p <- prop.table(xtab) |> round(4)
+    tbl_p <- prop.table(xtab) |> round(digits)
     tbl_r <- prop.table(xtab, margin = 1) |> round(digits)
     tbl_c <- prop.table(xtab, margin = 2) |> round(digits)
     tots <- sum(xtab)
@@ -117,77 +116,49 @@ cat_stats <- function(x, y = NULL, prop = "all", df = FALSE, tbl_df = FALSE, dig
     r_props <- r_tot / tots
 
     if (prop == "all"){
-      props_tbl <- t(sapply(1:nrow(xtab), \(i) {paste(xtab[i,], tbl_p[i,], tbl_r[i,], tbl_c[i,], sep = " / ")}))
-      cols_tbl <- paste(c_tot, round(c_props, digits), sep =  " / ")
-      rows_tbl <- paste(r_tot, round(r_props, digits), sep =  " / ")
-      tbl_pdf <- rbind(cbind(props_tbl, rows_tbl), c(cols_tbl, paste("Total:", tots)))
-      colnames(tbl_pdf) <- c(names(c_tot), "Row Totals")
-      rownames(tbl_pdf) <- c(names(r_tot), "Col Totals")
 
       message(paste(capture.output({
         cat("Continguency Table \n \n")
-        print(tbl_pdf)
-        cat("\n")
-        cat("Cell Contents: n / tbl % / row % / col % \n")
-        cat("Col Totals Contents: n / row % \n")
-        cat("Row Totals Contents: n / col % \n")
         cat(paste0("Column Variable:\ " , deparse(substitute(y)), "\n"))
-        cat(paste0("Row Variable:\ " , deparse(substitute(x))))
+        cat(paste0("Row Variable:\ " , deparse(substitute(x)), "\n", "\n"))
       }), collapse = "\n"))
+      return(list(
+        frequency = xtab,
+        table_prop = tbl_p,
+        row_prop = tbl_r,
+        col_prop = tbl_c
+      ))
+
     } else if (prop == "row") {
-      props_tbl <- t(sapply(1:nrow(xtab), \(i) {paste(xtab[i,], tbl_r[i,], sep = " / ")}))
-      cols_tbl <- paste(c_tot, round(c_props, digits), sep =  " / ")
-      rows_tbl <- paste(r_tot, round(r_props, digits), sep =  " / ")
-      tbl_pdf <- rbind(cbind(props_tbl, rows_tbl), c(cols_tbl, paste("Total:", tots)))
-      colnames(tbl_pdf) <- c(names(c_tot), "Row Totals")
-      rownames(tbl_pdf) <- c(names(r_tot), "Col Totals")
-
       message(paste(capture.output({
         cat("Continguency Table \n \n")
-        print(tbl_pdf)
-        cat("\n")
-        cat("Cell Contents: n / row % \n")
-        cat("Col Totals Contents: n / row % \n")
-        cat("Row Totals Contents: n / col % \n")
         cat(paste0("Column Variable:\ " , deparse(substitute(y)), "\n"))
         cat(paste0("Row Variable:\ " , deparse(substitute(x))))
       }), collapse = "\n"))
+      return(list(
+        frequency = xtab,
+        row_prop = tbl_r
+      ))
     } else if (prop == "col") {
-      props_tbl <- t(sapply(1:nrow(xtab), \(i) {paste(xtab[i,], tbl_c[i,], sep = " / ")}))
-      cols_tbl <- paste(c_tot, round(c_props, digits), sep =  " / ")
-      rows_tbl <- paste(r_tot, round(r_props, digits), sep =  " / ")
-      tbl_pdf <- rbind(cbind(props_tbl, rows_tbl), c(cols_tbl, paste("Total:", tots)))
-      colnames(tbl_pdf) <- c(names(c_tot), "Row Totals")
-      rownames(tbl_pdf) <- c(names(r_tot), "Col Totals")
-
       message(paste(capture.output({
         cat("Continguency Table \n \n")
-        print(tbl_pdf)
-        cat("\n")
-        cat("Cell Contents: n / col % \n")
-        cat("Col Totals Contents: n / row % \n")
-        cat("Row Totals Contents: n / col % \n")
         cat(paste0("Column Variable:\ " , deparse(substitute(y)), "\n"))
         cat(paste0("Row Variable:\ " , deparse(substitute(x))))
       }), collapse = "\n"))
+      return(list(
+        frequency = xtab,
+        col_prop = tbl_c
+      ))
     } else {
-      props_tbl <- t(sapply(1:nrow(xtab), \(i) {paste(xtab[i,], tbl_p[i,], sep = " / ")}))
-      cols_tbl <- paste(c_tot, round(c_props, digits), sep =  " / ")
-      rows_tbl <- paste(r_tot, round(r_props, digits), sep =  " / ")
-      tbl_pdf <- rbind(cbind(props_tbl, rows_tbl), c(cols_tbl, paste("Total:", tots)))
-      colnames(tbl_pdf) <- c(names(c_tot), "Row Totals")
-      rownames(tbl_pdf) <- c(names(r_tot), "Col Totals")
-
       message(paste(capture.output({
         cat("Continguency Table \n \n")
-        print(tbl_pdf)
-        cat("\n")
-        cat("Cell Contents: n / tbl % \n")
-        cat("Col Totals Contents: n / row % \n")
-        cat("Row Totals Contents: n / col % \n")
         cat(paste0("Column Variable:\ " , deparse(substitute(y)), "\n"))
         cat(paste0("Row Variable:\ " , deparse(substitute(x))))
       }), collapse = "\n"))
+      return(list(
+        frequency = xtab,
+        table_prop = tbl_p
+      ))
     }
   }
 }

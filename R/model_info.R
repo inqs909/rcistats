@@ -59,38 +59,44 @@ linear_model_info <- function(model) {
 
   names(factor_info) <- factor_predictors
 
-  for (i in 1:length(factor_predictors)) {
-    factor_info[[factor_predictors[[i]]]]$levels[1] <- paste(
-      factor_info[[factor_predictors[[i]]]]$levels[1],
-      "(Reference)"
-    )
+  if (!length(factor_predictors) == 0){
+    for (i in 1:length(factor_predictors)) {
+      factor_info[[factor_predictors[[i]]]]$levels[1] <- paste(
+        factor_info[[factor_predictors[[i]]]]$levels[1],
+        "(Reference)"
+      )
+    }
   }
   message("Outcome Variable: ", outcome_name)
-  message(paste(
-    capture.output({
-      cat("Numerical Predictors: \n")
-      for (i in 1:length(numeric_predictors)) {
-        cat(paste("  ", numeric_predictors[i], " \n"))
-      }
-    }),
-    collapse = "\n"
-  ))
-  message(paste(
-    capture.output({
-      cat("Categorical Predictors: \n")
-      for (i in 1:length(factor_predictors)) {
-        cat(paste("  ", factor_predictors[i], ": \n"))
-        for (j in 1:length(factor_info[[factor_predictors[[i]]]]$levels)) {
-          cat(paste(
-            "    ",
-            factor_info[[factor_predictors[[i]]]]$levels[j],
-            " \n"
-          ))
+  if (!length(numeric_predictors) == 0){
+    message(paste(
+      capture.output({
+        cat("Numerical Predictors: \n")
+        for (i in 1:length(numeric_predictors)) {
+          cat(paste("  ", numeric_predictors[i], " \n"))
         }
-      }
-    }),
-    collapse = "\n"
-  ))
+      }),
+      collapse = "\n"
+    ))
+  }
+  if (!length(factor_predictors) == 0){
+    message(paste(
+      capture.output({
+        cat("Categorical Predictors: \n")
+        for (i in 1:length(factor_predictors)) {
+          cat(paste0("  ", factor_predictors[i], ": \n"))
+          for (j in 1:length(factor_info[[factor_predictors[[i]]]]$levels)) {
+            cat(paste(
+              "    ",
+              factor_info[[factor_predictors[[i]]]]$levels[j],
+              " \n"
+            ))
+          }
+        }
+      }),
+      collapse = "\n"
+    ))
+  }
 }
 
 
@@ -153,37 +159,62 @@ logistic_model_info <- function(model) {
 
   names(factor_info) <- factor_predictors
 
-  for (i in 1:length(factor_predictors)) {
-    factor_info[[factor_predictors[[i]]]]$levels[1] <- paste(
-      factor_info[[factor_predictors[[i]]]]$levels[1],
-      "(Reference)"
-    )
+  if (!length(factor_predictors) == 0){
+    for (i in 1:length(factor_predictors)) {
+      factor_info[[factor_predictors[[i]]]]$levels[1] <- paste(
+        factor_info[[factor_predictors[[i]]]]$levels[1],
+        "(Reference)"
+      )
+    }
   }
   message("Outcome Variable: ", names(mf[1]))
   message("  Modeling Probability: ", post)
-  message(paste(
-    capture.output({
-      cat("Numerical Predictors: \n")
-      for (i in 1:length(numeric_predictors)) {
-        cat(paste("  ", numeric_predictors[i], " \n"))
-      }
-    }),
-    collapse = "\n"
-  ))
-  message(paste(
-    capture.output({
-      cat("Categorical Predictors: \n")
-      for (i in 1:length(factor_predictors)) {
-        cat(paste0("  ", factor_predictors[i], ": \n"))
-        for (j in 1:length(factor_info[[factor_predictors[[i]]]]$levels)) {
-          cat(paste(
-            "    ",
-            factor_info[[factor_predictors[[i]]]]$levels[j],
-            " \n"
-          ))
+  if (!length(numeric_predictors) == 0){
+    message(paste(
+      capture.output({
+        cat("Numerical Predictors: \n")
+        for (i in 1:length(numeric_predictors)) {
+          cat(paste("  ", numeric_predictors[i], " \n"))
         }
-      }
-    }),
-    collapse = "\n"
-  ))
+      }),
+      collapse = "\n"
+    ))
+  }
+  if (!length(factor_predictors) == 0){
+    message(paste(
+      capture.output({
+        cat("Categorical Predictors: \n")
+        for (i in 1:length(factor_predictors)) {
+          cat(paste0("  ", factor_predictors[i], ": \n"))
+          for (j in 1:length(factor_info[[factor_predictors[[i]]]]$levels)) {
+            cat(paste(
+              "    ",
+              factor_info[[factor_predictors[[i]]]]$levels[j],
+              " \n"
+            ))
+          }
+        }
+      }),
+      collapse = "\n"
+    ))
+  }
+}
+
+#' Extract model information
+#'
+#' @param model An R object that results from a logistic regression model (glm class).
+#'
+#' @returns A message indicating which category is being modeled as success from the logistic regression model.
+#'
+#' @export
+#' 
+
+model_info <- function(model){
+  if (inherits(model, "lm") & length(class(model)) == 1) {
+    linear_model_info(mode)
+  } else if (inherits(model, "glm") & model$family$family == "binomial") {
+    logistic_model_info(model)
+  } else {
+        stop("Model must be a linear or logistic regression (glm with binomial family).")
+  }
 }

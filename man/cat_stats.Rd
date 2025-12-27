@@ -4,7 +4,7 @@
 \alias{cat_stats}
 \title{Obtain Frequencies and Proportions for a Categorical Variable}
 \usage{
-cat_stats(x, y = NULL, prop = "all", df = FALSE, tbl_df = FALSE, digits = 4)
+cat_stats(x, y = NULL, prop = "all", tbl_df = FALSE, digits = 4)
 }
 \arguments{
 \item{x}{Vector}
@@ -12,8 +12,6 @@ cat_stats(x, y = NULL, prop = "all", df = FALSE, tbl_df = FALSE, digits = 4)
 \item{y}{Vector for Cross-tabulations.}
 
 \item{prop}{Character indicating what type of proportions to provide. Defaults to "all".}
-
-\item{df}{Logical indicating to provide a tibble for cross tabulations with table proportions.}
 
 \item{tbl_df}{Logical indicating if you need a df for a single variable for a pie chart or other things.}
 
