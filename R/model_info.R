@@ -211,7 +211,7 @@ logistic_model_info <- function(model) {
 
 model_info <- function(model){
   if (inherits(model, "lm") & length(class(model)) == 1) {
-    linear_model_info(mode)
+    linear_model_info(model)
   } else if (inherits(model, "glm") & model$family$family == "binomial") {
     logistic_model_info(model)
   } else {
